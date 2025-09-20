@@ -3,7 +3,7 @@ const express = require('express');
 const path = require('path');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000; // declare PORT once at the top
 
 // Safe import of scraper.js
 let scraper;
@@ -11,8 +11,8 @@ try {
   scraper = require(path.join(__dirname, 'scraper'));
   console.log('scraper module loaded successfully.');
 } catch (err) {
-  console.error('scraper module not found! Make sure scraper.js exists in the same folder as server.js.');
-  scraper = null; // fallback if scraper is missing
+  console.error('scraper module not found! Make sure scraper.js exists.');
+  scraper = null;
 }
 
 // Example route
@@ -29,7 +29,7 @@ app.get('/', async (req, res) => {
   }
 });
 
+// Start the server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-});const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 YouTube Downloader API running on port ${PORT}`));
+});
