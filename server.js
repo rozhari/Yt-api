@@ -1,38 +1,35 @@
 // server.js
 const express = require('express');
-
-// Scraper import - make sure scraper.js same folder-ൽ ഉണ്ട്
-const { ytd } = require('./scraper');
+const path = require('path');
 
 const app = express();
+const PORT = process.env.PORT || 3000;
 
-// JSON parsing middleware
-app.use(express.json());
+// Safe import of scraper.js
+let scraper;
+try {
+  scraper = require(path.join(__dirname, 'scraper'));
+  console.log('scraper module loaded successfully.');
+} catch (err) {
+  console.error('scraper module not found! Make sure scraper.js exists in the same folder as server.js.');
+  scraper = null; // fallback if scraper is missing
+}
 
-// ✅ YouTube Download Endpoint
-app.get('/youtube', async (req, res) => {
-  try {
-    const url = req.query.url;
-    if (!url) return res.status(400).json({ error: 'URL required' });
-
-    // Call scraper
-    const result = await ytd(url);
-
-    if (!result || !result.url) {
-      return res.status(500).json({ error: 'Download link not found' });
+// Example route
+app.get('/', async (req, res) => {
+  if (scraper) {
+    try {
+      const data = await scraper(); // assuming scraper exports a function returning a promise
+      res.json({ success: true, data });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
     }
-
-    // Success
-    res.json({
-      title: result.title || 'YouTube Video',
-      url: result.url
-    });
-  } catch (err) {
-    console.error('YouTube download error:', err.message || err);
-    res.status(500).json({ error: err.message || 'YouTube download failed' });
+  } else {
+    res.status(500).send('Scraper module not available.');
   }
 });
 
-// Dynamic PORT (Render assigns via environment variable)
-const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 YouTube Downloader API running on port ${PORT}`));
